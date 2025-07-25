@@ -1,6 +1,6 @@
 {
   "name": "tailwind-dynamic-breakpoints",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Dynamically generate CSS for arbitrary breakpoints in Tailwind CSS.",
   "main": "index.js",
   "bin": {
