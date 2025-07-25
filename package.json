@@ -1,0 +1,22 @@
+{
+  "name": "tailwind-dynamic-breakpoints",
+  "version": "1.0.0",
+  "description": "Dynamically generate CSS for arbitrary breakpoints in Tailwind CSS.",
+  "main": "index.js",
+  "bin": {
+    "tdb": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "build": "node index.js --post-command \"echo 'Build step should be customized based on project. Example: npx tailwindcss -i ./src/input.css -o ./src/output.css'\""
+  },
+  "dependencies": {
+    "tailwindcss": "^3.0.0",
+    "postcss": "^8.0.0",
+    "glob": "^10.0.0",
+    "chokidar": "^3.5.0",
+    "yargs": "^17.0.0"
+  },
+  "author": "Alexey Kurgan",
+  "license": "MIT"
+}
