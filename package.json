@@ -6,6 +6,23 @@
   "bin": {
     "tdb": "./index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexeyKurgan/tailwind-dynamic-breakpoints.git"
+  },
+  "keywords": [
+    "tailwind",
+    "tailwindcss",
+    "dynamic",
+    "breakpoints",
+    "responsive",
+    "css"
+  ],
+  "author": "Alexey Kurgan <akurgan880@gmail.com>",
+
+  "bugs": {
+    "url": "https://github.com/AlexeyKurgan/tailwind-dynamic-breakpoints/issues}"},
+  "homepage": "https://github.com/AlexeyKurgan/tailwind-dynamic-breakpoints/blob/master/README.md",
   "scripts": {
     "start": "node index.js",
     "build": "node index.js --post-command \"echo 'Build step should be customized based on project. Example: npx tailwindcss -i ./src/input.css -o ./src/output.css'\""
@@ -17,6 +34,5 @@
     "chokidar": "^3.5.0",
     "yargs": "^17.0.0"
   },
-  "author": "Alexey Kurgan",
   "license": "MIT"
 }
