@@ -6,17 +6,7 @@ It scans your project files for custom breakpoint utility classes (e.g. media-ma
 
 With tdb, you’re no longer limited to predefined breakpoints. Use any pixel value directly in your utility classes:
 
-<div class="media-max-768:hidden">
-  Hidden on screens smaller than 768px
-</div>
-
-<div class="media-min-1024:flex">
-  Flex on screens wider than 1024px
-</div>
-
-<div class="media-max-1337:text-xl">
-  Text becomes extra-large on screens below 1337px
-</div>
+<pre> ```html <div class="media-max-768:hidden"> Hidden on screens smaller than 768px </div> <div class="media-min-1024:flex"> Flex on screens wider than 1024px </div> <div class="media-max-1337:text-xl"> Text becomes extra-large on screens below 1337px </div> ``` </pre>
 
 ✨ Features:
 
@@ -34,8 +24,6 @@ Automatically regenerates CSS when your files change — perfect for a smooth de
 
 🧩 Post Command Hook (--post-command)
 Run any shell command after successful CSS generation — ideal for chaining build steps or triggering additional scripts.
-
-Вот красиво оформленная и структурированная секция **Installation** на английском языке — с пояснениями, примерами и логичным разделением:
 
 ---
 
@@ -251,14 +239,16 @@ Vite starts the dev server. `tdb` watches for changes and generates styles on th
 🛠️ Scripts
 Add the following scripts to your package.json:
 
+```json
 {
-"scripts": {
-"dev": "concurrently \"next dev\" \"wait-on http://localhost:3000 && tdb --config tailwind.config.js --output ./src/app/tdb-generated.css --watch\"",
-"dev:turbo": "concurrently \"next dev --turbopack\" \"wait-on http://localhost:3000 && tdb --config tailwind.config.js --output ./src/app/tdb-generated.css --watch\"",
-"build": "tdb --config tailwind.config.js --output ./src/app/tdb-generated.css && next build",
-"start": "next start"
+  "scripts": {
+    "dev": "concurrently \"next dev\" \"wait-on http://localhost:3000 && tdb --config tailwind.config.js --output ./src/app/tdb-generated.css --watch\"",
+    "dev:turbo": "concurrently \"next dev --turbopack\" \"wait-on http://localhost:3000 && tdb --config tailwind.config.js --output ./src/app/tdb-generated.css --watch\"",
+    "build": "tdb --config tailwind.config.js --output ./src/app/tdb-generated.css && next build",
+    "start": "next start"
+  }
 }
-}
+```
 
 dev: For regular development (without Turbopack)
 
