@@ -2,11 +2,17 @@
 
 tailwind-dynamic-breakpoints (or simply tdb) is a powerful CLI tool designed to dynamically generate custom media query CSS for Tailwind CSS.
 
-It scans your project files for custom breakpoint utility classes (e.g. media-max-1209:text-black) and automatically generates the corresponding CSS using Tailwind’s engine. All matched styles are compiled into a single output CSS file.
+It scans your project files for custom breakpoint utility classes (e.g. media-max-1209:text-black) 
+and automatically generates the corresponding CSS using Tailwind’s engine. 
+All matched styles are compiled into a single output CSS file.
 
 With tdb, you’re no longer limited to predefined breakpoints. Use any pixel value directly in your utility classes:
 
-<pre> ```html <div class="media-max-768:hidden"> Hidden on screens smaller than 768px </div> <div class="media-min-1024:flex"> Flex on screens wider than 1024px </div> <div class="media-max-1337:text-xl"> Text becomes extra-large on screens below 1337px </div> ``` </pre>
+```html
+    <div class="media-max-768:hidden"> Hidden on screens smaller than 768px </div> 
+    <div class="media-min-1024:flex"> Flex on screens wider than 1024px </div> 
+    <div className="media-max-1337:text-xl"> Text becomes extra-large on screens below 1337px </div>
+``` 
 
 ✨ Features:
 
