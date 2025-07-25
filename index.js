@@ -2,7 +2,7 @@
 
 const fs = require('fs/promises');
 const path = require('path');
-const { exec } = require('child_process'); // <--- Added
+const { exec } = require('child_process');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const chokidar = require('chokidar');
@@ -29,17 +29,22 @@ async function run(config) {
     const tailwindConfigPath = path.resolve(process.cwd(), config.config);
     let tailwindConfig;
     try {
-      tailwindConfig = require(tailwindConfigPath);
+      // Attempt to load the config. Handle both CommonJS (module.exports) and ES Modules (export default)
+      const loadedConfig = require(tailwindConfigPath);
+      tailwindConfig = loadedConfig.default || loadedConfig;
     } catch (err) {
-      console.error(`Error: Could not load tailwind.config.js from ${tailwindConfigPath}. Please ensure the path is correct.`);
+      console.error(`Error: Could not load tailwind.config.js from ${tailwindConfigPath}. Please ensure the path is correct and it's a CommonJS module (using module.exports) if not pre-transpiled.`);
+      console.error(`Detailed error: ${err.message}`);
       process.exit(1);
     }
 
-    if (!tailwindConfig.content || tailwindConfig.content.length === 0) {
-      console.warn('Warning: No content paths specified in tailwind.config.js. No files will be scanned for dynamic breakpoints.');
-      // Do not return here to allow post-command execution even if no content
+    // IMPORTANT: Add a robust check for tailwindConfig and its content property
+    if (!tailwindConfig || typeof tailwindConfig.content === 'undefined') {
+      console.error('Error: "content" property not found or invalid in tailwind.config.js. Please ensure your Tailwind CSS configuration is correct.');
+      process.exit(1);
     }
 
+    // The parseFiles function in lib/parser.js now handles empty/undefined content paths gracefully.
     const files = await parseFiles(tailwindConfig.content);
     
     // 2. Generate CSS
@@ -120,14 +125,16 @@ if (argv.watch) {
   const tailwindConfigPath = path.resolve(process.cwd(), argv.config);
   let tailwindConfig;
   try {
-    tailwindConfig = require(tailwindConfigPath);
+    const loadedConfig = require(tailwindConfigPath);
+    tailwindConfig = loadedConfig.default || loadedConfig;
   } catch (err) {
-    console.error(`Error: Could not load tailwind.config.js for watch mode from ${tailwindConfigPath}. Please ensure the path is correct.`);
+    console.error(`Error: Could not load tailwind.config.js for watch mode from ${tailwindConfigPath}. Please ensure the path is correct and it's a CommonJS module.`);
+    console.error(`Detailed error for watch mode: ${err.message}`);
     process.exit(1);
   }
 
-  if (!tailwindConfig.content || tailwindConfig.content.length === 0) {
-    console.warn('Warning: No content paths specified in tailwind.config.js. Watch mode will not track any files.');
+  if (!tailwindConfig || typeof tailwindConfig.content === 'undefined' || tailwindConfig.content.length === 0) {
+    console.warn('Warning: No content paths specified in tailwind.config.js for watch mode. Watch mode will not track any files.');
   } else {
     console.log('👀 Watching for changes in:', tailwindConfig.content);
     chokidar.watch(tailwindConfig.content, { ignored: /(^|[\/\\])\../, persistent: true }).on('change', (filePath) => {

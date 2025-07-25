@@ -1,130 +1,357 @@
-## Overview
+📦 Overview:
 
-`tailwind-dynamic-breakpoints` is a CLI tool designed to dynamically generate CSS for arbitrary breakpoints in Tailwind CSS. It scans your project files for classes that utilize dynamic breakpoints (e.g., `media-max-1209:text-black`), generates the corresponding CSS using Tailwind, and combines everything into a single output CSS file.
+tailwind-dynamic-breakpoints (or simply tdb) is a powerful CLI tool designed to dynamically generate custom media query CSS for Tailwind CSS.
 
-## Features
+It scans your project files for custom breakpoint utility classes (e.g. media-max-1209:text-black) and automatically generates the corresponding CSS using Tailwind’s engine. All matched styles are compiled into a single output CSS file.
 
-- Scans specified files for dynamic breakpoint classes within your project (HTML, JSX, etc.).
-- Generates CSS rules for these dynamic breakpoints using Tailwind CSS and PostCSS.
-- Consolidates generated CSS into a single, clean output file.
-- Supports file watching (`--watch`) for automatic regeneration of CSS on changes, enhancing developer experience.
-- Allows execution of a custom command (`--post-command`) after successful CSS generation, useful for chaining build steps.
+With tdb, you’re no longer limited to predefined breakpoints. Use any pixel value directly in your utility classes:
 
-## Installation
+<div class="media-max-768:hidden">
+  Hidden on screens smaller than 768px
+</div>
 
-To integrate `tailwind-dynamic-breakpoints` into your project, simply install it as a development dependency using your preferred package manager:
+<div class="media-min-1024:flex">
+  Flex on screens wider than 1024px
+</div>
+
+<div class="media-max-1337:text-xl">
+  Text becomes extra-large on screens below 1337px
+</div>
+
+✨ Features:
+
+🔍 File Scanning
+Automatically searches for utility classes with dynamic breakpoints in your project files (.html, .jsx, .tsx, etc.).
+
+🎨 CSS Generation
+Generates media query CSS rules for custom breakpoints using Tailwind CSS and PostCSS under the hood.
+
+📦 CSS Consolidation
+All generated styles are combined into a single, easy-to-include output file.
+
+🔁 Watch Mode (--watch)
+Automatically regenerates CSS when your files change — perfect for a smooth development workflow.
+
+🧩 Post Command Hook (--post-command)
+Run any shell command after successful CSS generation — ideal for chaining build steps or triggering additional scripts.
+
+Вот красиво оформленная и структурированная секция **Installation** на английском языке — с пояснениями, примерами и логичным разделением:
+
+---
+
+## 🛠️ Installation
+
+### 🔧 Standard Installation
+
+To install `tailwind-dynamic-breakpoints` in any project, use the following command:
 
 ```bash
-# Using npm
-npm install tailwind-dynamic-breakpoints --save-dev
-
-# Or using yarn
-yarn add tailwind-dynamic-breakpoints --dev
+npm install --save-dev tailwind-dynamic-breakpoints
 ```
 
-## Usage
+> This is all you need for basic usage and custom breakpoint generation.
 
-Once installed, `tailwind-dynamic-breakpoints` can be run from your project's root directory or within an npm script.
+---
 
-### Basic Execution
+### ⚙️ For Vite and Next.js Projects
 
-To run the tool with default settings (output to `./dynamic-breakpoints.css`, using `tailwind.config.js`):
+If you're using **Vite** or **Next.js**, you'll likely want a smoother development experience with auto-regeneration and parallel scripts. In that case, install the following additional dependencies:
+
+```bash
+npm install --save-dev concurrently wait-on
+```
+
+These tools help with running `tdb` alongside your dev server.
+
+---
+
+### 📦 Tailwind CSS Setup
+
+If you haven't installed Tailwind CSS yet, follow their official CLI installation:
+
+```bash
+npm install -D tailwindcss
+npx tailwindcss init
+```
+
+[🔗 Tailwind CSS CLI Installation Guide](https://tailwindcss.com/docs/installation/tailwind-cli)
+
+---
+
+### 📋 What We've Installed
+
+| Package                                    | Purpose                                                           |
+| ------------------------------------------ | ----------------------------------------------------------------- |
+| **`tailwind-dynamic-breakpoints`**         | The core CLI tool for generating custom media query utilities     |
+| **`tailwindcss`**, **`@tailwindcss/vite`** | Required for Tailwind to work with Vite                           |
+| **`concurrently`**, **`wait-on`**          | Allow parallel execution of commands — useful in development mode |
+
+## ⚙️ Core Setup: General Projects (HTML/JS/Any Framework)
+
+These steps apply to **any project using Tailwind CSS**. They explain how `tdb` works, how to configure it, and how to integrate the generated CSS into your project.
+
+---
+
+### 1. Configure `tailwind.config.js`
+
+Make sure your `tailwind.config.js` is located in the **root of your project**, uses a **`.js` extension (not `.ts`!)**, and correctly defines the paths to your files in the `content` array.
+
+```js
+// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+export default {
+  // ⚠️ Use `export default` for compatibility with most bundlers and with tdb
+  content: [
+    "./index.html",
+    "./src/**/*.{html,js,ts,jsx,tsx}", // tdb will scan these files
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+---
+
+### 2. Choose Output Location for Generated CSS
+
+By default, `tdb` creates a file called `dynamic-breakpoints.css` in your project root.
+
+> 🔥 **Best practice**: explicitly set the output path using the `--output` flag — especially for projects using bundlers like Vite or Webpack.
+
+For example, save it to: `./src/tdb-generated.css`
+
+💡 **Important**: When you define an `--output` path in your `package.json` scripts, `tdb` will **automatically create this file** if it doesn't exist. There's no need to create it manually.
+
+```json
+{
+  "scripts": {
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && tdb --config tailwind.config.js --output ./src/tdb-generated.css --watch\"",
+    "build": "tdb --config tailwind.config.js --output ./src/tdb-generated.css && tsc -b && vite build"
+  }
+}
+```
+
+---
+
+### 3. Import Generated CSS Into Your Main Stylesheet
+
+Make sure to import the generated CSS into your main CSS file, after the core Tailwind directives:
+
+```css
+/* src/main.css or your main stylesheet */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "./tdb-generated.css"; /* <-- Important: Import tdb-generated styles */
+```
+
+---
+
+### 4. Add NPM Scripts
+
+Add custom `tdb` commands to your `package.json` depending on your dev environment (React/Vite, Next.js, or plain HTML/JS).
+
+---
+
+## 🚀 Usage Examples
+
+### ▶️ Basic Execution
+
+To run `tdb` with default options:
 
 ```bash
 npx tdb
 ```
 
-### Configuration Options
+This will:
 
-The CLI tool supports the following options:
+- Use `tailwind.config.js`
+- Output to `./dynamic-breakpoints.css`
 
-- **`-o, --output <path>`**: Specifies the path to the output CSS file where dynamic breakpoints CSS will be written.
-  - Default: `./dynamic-breakpoints.css`
-- **`-c, --config <path>`**: Specifies the path to your `tailwind.config.js` file. This is used by `tdb` to identify which content files to scan for dynamic classes and to configure Tailwind CSS for generating the utility styles.
-  - Default: `tailwind.config.js`
-- **`-w, --watch`**: Enables watch mode. In this mode, `tdb` continuously monitors the files specified in your `tailwind.config.js`'s `content` array. When changes are detected, it automatically re-scans, re-generates CSS, and re-executes any specified `--post-command`.
-- **`-p, --post-command <command>`**: Specifies a shell command to execute after `tdb` successfully generates the CSS output file. This is extremely useful for chaining `tdb` with your main Tailwind CSS compilation step or other build tools, ensuring your final CSS is always up-to-date.
-  - Example: `"npx tailwindcss -i ./src/input.css -o ./src/output.css"`
+---
 
-### Examples
+### ⚙️ CLI Options
 
-#### Custom Output and Config
+| Option                         | Description                                                                      |
+| ------------------------------ | -------------------------------------------------------------------------------- |
+| `-o, --output <path>`          | Output CSS file for dynamic breakpoints (`./dynamic-breakpoints.css` by default) |
+| `-c, --config <path>`          | Path to your `tailwind.config.js` file                                           |
+| `-w, --watch`                  | Watch mode — regenerates CSS on file change                                      |
+| `-p, --post-command <command>` | Shell command to run after successful generation (e.g. recompiling Tailwind)     |
 
-Generates CSS to `dist/custom-breakpoints.css` using a specific Tailwind config file located in `configs/tailwind.custom.js`:
-
-```bash
-npx tdb -o dist/custom-breakpoints.css -c configs/tailwind.custom.js
-```
-
-#### Watch Mode with Automatic Tailwind Compilation (Recommended for Development)
-
-This is the most powerful and common use case for automating your development workflow. It ensures that every time you save a file containing dynamic breakpoint classes, your final CSS is automatically updated.
-
-**Step 1: Integrate `tdb`'s output into your main CSS.**
-First, ensure your primary CSS entry file (e.g., `src/input.css`, `src/app/globals.css`, or `styles/globals.css` in Next.js projects) imports the CSS file generated by `tdb`. The path in the `@import` rule must match the path specified in `tdb`'s `--output` option.
-
-```css
-/* src/input.css (or your project's main CSS entry point) */
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@import "./styles/generated.css"; /* <--- IMPORTANT: Path should match tdb's --output */
-
-/* Your other global styles */
-```
-
-**Step 2: Run `tdb` with watch mode and the Tailwind compilation command.**
-Keep this command running in a dedicated terminal during your development sessions:
+Example:
 
 ```bash
-npx tdb --output src/styles/generated.css --config tailwind.config.js --post-command "npx tailwindcss -i ./src/input.css -o ./src/output.css" --watch
+tdb -c tailwind.config.js -o ./src/tdb-generated.css -w -p "npx tailwindcss -i ./src/main.css -o ./public/build.css"
 ```
 
-Any time you add or modify dynamic breakpoint classes in your source files, `tdb` will regenerate `src/styles/generated.css`, and then automatically trigger `npx tailwindcss` to update your final `src/output.css`.
+---
 
-#### Production Build Integration
+## 🔄 Integrating into Dev & Build Workflows
 
-For production builds, it's crucial that `tdb` runs and generates its CSS _before_ your main project build process. You can effectively chain these commands in your `package.json` scripts:
+### 🧠 General Idea
+
+- In **development**, `tdb` and your dev server (Vite, Next.js) should run **in parallel**, regenerating CSS on the fly.
+- In **production**, `tdb` must run **before** your bundler to ensure all styles are ready.
+
+---
+
+## 💡 React + Vite Projects
+
+### 1. Update `vite.config.ts`
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(), // Enables Tailwind in Vite
+  ],
+});
+```
+
+### 2. Setup NPM Scripts
 
 ```json
 {
   "scripts": {
-    "build:tdb": "npx tdb --output src/styles/generated.css --config tailwind.config.js",
-    "build:css": "npm run build:tdb && npx tailwindcss -i ./src/input.css -o ./src/output.css",
-    "build": "npm run build:css && next build" // Example for a Next.js project. Replace 'next build' with your project's actual build command (e.g., 'react-scripts build', 'vite build')
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && tdb --config tailwind.config.js --output ./src/tdb-generated.css --watch\"",
+    "build": "tdb --config tailwind.config.js --output ./src/tdb-generated.css && tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   }
 }
 ```
 
-Then, simply run `npm run build` (or `npm run build:css` if you only need the CSS part) to trigger the entire compilation sequence.
+### 3. Start Development
 
-### Integration with Modern Frameworks (React, Next.js, Vite, etc.)
+```bash
+npm run dev
+```
 
-`tailwind-dynamic-breakpoints` is designed to be highly flexible and integrates seamlessly with various build setups. Its primary function is to generate the specific CSS for dynamic breakpoints into a file (e.g., `generated.css`). The way this file is finally integrated into your application's stylesheet depends on your framework's build system.
+Vite starts the dev server. `tdb` watches for changes and generates styles on the fly. Tailwind updates instantly via Fast Refresh.
 
-**Key Principle for Integration:**
-Always **import the `tdb` generated CSS file (e.g., `generated.css`) into your project's main global CSS entry point.**
+---
 
-- **React (Create React App, Vite, Custom Webpack):**
-  Your `generated.css` should be `@import`ed into your primary global CSS file (e.g., `src/index.css`, `src/App.css`). In development mode (`npm start` or `npm run dev`), modern bundlers (Webpack, Vite) are highly efficient at detecting changes in imported CSS files. When `tdb` updates `generated.css`, the bundler automatically recompiles and triggers Hot Module Replacement (HMR), meaning you typically **won't need the `--post-command`** for development watch mode, as your dev server handles the final CSS refresh. For production, ensure `npm run build:tdb` runs before your framework's build command (`react-scripts build`, `vite build`).
-- **Next.js:**
-  Import `generated.css` into your global CSS file (e.g., `src/app/globals.css` for App Router or `styles/globals.css` for Pages Router). Next.js's development server (with Fast Refresh) will automatically pick up changes to `generated.css` when `tdb` updates it. Similar to React, the `--post-command` might not be strictly necessary for watch mode if `next dev` is already running. For production, ensure `tdb` runs before `next build` (e.g., `npm run build:tdb && next build`).
+## 💡 Next.js Projects
 
-<!-- end list -->
+### 1. Ensure Tailwind + PostCSS are configured
 
-## Notes and Potential Improvements
+`tdb` works out of the box with Tailwind in Next.js (no `vite` plugin needed).
 
+### 2. Setup NPM Scripts
+
+🛠️ Scripts
+Add the following scripts to your package.json:
+
+{
+"scripts": {
+"dev": "concurrently \"next dev\" \"wait-on http://localhost:3000 && tdb --config tailwind.config.js --output ./src/app/tdb-generated.css --watch\"",
+"dev:turbo": "concurrently \"next dev --turbopack\" \"wait-on http://localhost:3000 && tdb --config tailwind.config.js --output ./src/app/tdb-generated.css --watch\"",
+"build": "tdb --config tailwind.config.js --output ./src/app/tdb-generated.css && next build",
+"start": "next start"
+}
+}
+
+dev: For regular development (without Turbopack)
+
+dev:turbo: For development using Turbopack (Next.js experimental bundler)
+
+build: Generates the tdb-generated.css before building the app
+
+```
+
+⚙️ Basic Tailwind Configuration
+Create or update your tailwind.config.js with the following content:
+
+
+// tailwind.config.js
+module.exports = {
+  content: [
+    './src/app/**/*.{js,ts,jsx,tsx}',
+    './src/pages/**/*.{js,ts,jsx,tsx}',
+    './src/components/**/*.{js,ts,jsx,tsx}',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+
+```
+
+💅 Import Styles
+In your global CSS file (usually src/app/globals.css), import both Tailwind and your generated styles:
+
+css
+Copy
+Edit
+@import "tailwindcss";
+@import "./tdb-generated.css";
+
+### 3. Start Development
+
+```bash
+npm run dev
+```
+
+Next.js runs the server and picks up changes to the `tdb`-generated styles via Fast Refresh.
+
+---
+
+## 💡 Plain HTML/CSS/JS Projects (No Framework)
+
+If you're using Tailwind CLI (not Vite or Next.js), use `--post-command` to trigger a Tailwind build after each CSS generation.
+
+### 1. Setup Scripts
+
+```json
+{
+  "scripts": {
+    "dev": "concurrently \"tdb --config tailwind.config.js --output ./src/tdb-generated.css --watch --post-command \"npx tailwindcss -i ./src/main.css -o ./public/build.css\"\" \"npx serve public\"",
+    "build": "tdb --config tailwind.config.js --output ./src/tdb-generated.css && npx tailwindcss -i ./src/main.css -o ./public/build.css"
+  }
+}
+```
+
+> ℹ️ `--post-command` triggers `npx tailwindcss` after each generation.
+>
+> ⚠️ Use escaped quotes `\"` inside `--post-command` to make it work inside `package.json`.
+
+> 🧪 Optional: install `serve` to run a local server:
+
+```bash
+npm install -D serve
+```
+
+### 2. Run Dev Mode
+
+```bash
+npm run dev
+```
+
+`tdb` watches and generates the CSS. Tailwind compiles it, and the browser auto-refreshes.
+
+---
+
+Notes and Potential Improvements
 This tool provides a powerful foundation for working with dynamic breakpoints in Tailwind CSS. As with any new utility, there are areas for future enhancements and considerations for optimal use:
 
-- **Robust Error Handling**: While basic error handling is implemented to catch immediate issues, a more comprehensive and user-friendly error reporting mechanism is recommended for production environments. This could include more specific messages for common configuration mistakes, file access problems, or issues during CSS generation.
-- **Tailwind Configuration (`content` field)**: It is crucial that your `tailwind.config.js` is correctly set up, especially the `content` field. `tdb` relies on this configuration to accurately scan your project files for dynamic breakpoint classes. Incorrect or missing paths here will prevent `tdb` from finding and generating CSS for your dynamic classes.
-- **Performance for Large Projects**: For very large projects with a substantial number of files or extremely frequent changes, the current watch mode's re-scanning and re-generation process could potentially be optimized. Future improvements might include incremental scanning, more intelligent caching strategies, or parallel processing to speed up regeneration times.
-- **Custom Utilities Validation**: The tool's ability to generate CSS for a given utility class (e.g., `text-black`, `text-[var(--primary)]`, or a custom utility like `my-custom-utility`) depends entirely on how Tailwind CSS itself processes and generates that utility. Ensure any custom utility classes you use with dynamic breakpoints are properly defined and generated by your `tailwind.config.js`. If Tailwind cannot generate CSS for a specific utility, `tdb` will not be able to either, and a warning will be logged.
-- **Unit Tests**: Implementing a comprehensive suite of unit tests for the core logic, including class parsing, CSS generation, and CLI argument handling, is highly recommended. This will ensure stability, reliability, and ease of future maintenance and feature additions as the project grows.
-- **Extensibility**: As a build tool, `tdb` could be extended with more advanced features. For example, a plugin system could allow users to define custom parsing rules beyond the current regex or integrate more deeply with specific PostCSS plugins.
+Tailwind Configuration (content field): It's crucial that your tailwind.config.js is correctly set up, especially the content field. tdb relies on this configuration to accurately scan your project files for dynamic breakpoint classes. Incorrect or missing paths here will prevent tdb from finding and generating CSS for your dynamic classes.
 
-## License
+Performance for Large Projects: For very large projects with a substantial number of files or extremely frequent changes, the current watch mode's re-scanning and re-generation process could potentially be optimized. Future improvements might include incremental scanning, more intelligent caching strategies, or parallel processing to speed up regeneration times.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Custom Utility Validation: The tool's ability to generate CSS for a given utility class (e.g., text-black, text-[var(--primary)], or a custom utility like my-custom-utility) depends entirely on how Tailwind CSS itself processes and generates that utility. Ensure any custom utility classes you use with dynamic breakpoints are properly defined and generated by your tailwind.config.js. If Tailwind cannot generate CSS for a specific utility, tdb won't be able to either, and a warning will be logged.
+
+.ts support for tailwind.config: Currently, tdb expects tailwind.config.js to be a .js file. Direct support for .ts configuration files would require additional transpilation steps within the tool itself, which would complicate its dependencies and increase its size. For now, we recommend using the .js version of your Tailwind config.
+
+📄 License
+This project is licensed under the MIT License – see the LICENSE file for details.
